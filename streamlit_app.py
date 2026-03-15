@@ -2,90 +2,147 @@ import sys
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parent
-
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.append(str(PROJECT_ROOT))
 
 import streamlit as st
 
-from src.data_loading import load_raw_crime_data
-from src.data_processing import process_crime_data
-from src.analytics import (
-    build_kpi_summary,
-    get_crime_type_distribution,
-    get_monthly_totals,
-    get_monthly_trend_by_crime_type,
-    get_crime_heatmap_data,
-    get_outcome_distribution,
-    get_top_locations,
-    get_top_districts,
-    get_map_data,
-    get_data_quality_summary,
-    build_key_takeaways,
-)
-from app.components.filters import render_sidebar_filters, apply_filters
+from src.config import APP_ICON, APP_LAYOUT, APP_TITLE
+from src.dashboard_service import load_dashboard_base_data, build_dashboard_data
+from app.components.filters import render_sidebar_filters
 from app.components.kpis import render_kpi_row
 from app.components.charts import (
+    render_crime_heatmap,
     render_crime_type_distribution,
     render_monthly_totals,
     render_monthly_trend_by_crime_type,
-    render_crime_heatmap,
     render_outcome_distribution,
-    render_top_locations,
     render_top_districts,
-    render_map,
+    render_top_locations,
+    # render_map,
 )
 from app.components.tables import (
-    render_key_takeaways,
     render_data_quality_summary,
     render_filtered_data_preview,
+    render_key_takeaways,
 )
 
-st.set_page_config(page_title="West Yorkshire Crime Analytics", layout="wide")
 
-raw_df = load_raw_crime_data()
-processed_df = process_crime_data(raw_df)
+@st.cache_data(show_spinner=True)
+def load_app_data():
+    return load_dashboard_base_data()
 
-filters = render_sidebar_filters(processed_df)
-filtered_df = apply_filters(processed_df, filters)
 
-st.title("West Yorkshire Crime Analytics Dashboard")
+def render_header() -> None:
+    st.title(APP_TITLE)
+    st.caption(
+        "Interactive crime analytics dashboard built from West Yorkshire street-level crime data."
+    )
 
-kpi_summary = build_kpi_summary(filtered_df)
-render_kpi_row(kpi_summary)
+    with st.expander("About this application", expanded=False):
+        st.markdown(
+            """
+            This dashboard explores offence patterns, monthly trends, outcomes,
+            and location-level concentration in the West Yorkshire street crime dataset.
 
-st.markdown("---")
+            **Architecture**
+            - modular data loading
+            - schema validation
+            - reusable processing pipeline
+            - separate analytics layer
+            - service-layer orchestration
+            - Streamlit presentation components
 
-col1, col2 = st.columns(2)
-with col1:
-    render_crime_type_distribution(get_crime_type_distribution(filtered_df))
-with col2:
-    render_monthly_totals(get_monthly_totals(filtered_df))
+            **Purpose**
+            To demonstrate a production-style analytics application for crime and public-safety data.
+            """
+        )
 
-col3, col4 = st.columns(2)
-with col3:
-    render_monthly_trend_by_crime_type(get_monthly_trend_by_crime_type(filtered_df))
-with col4:
-    render_crime_heatmap(get_crime_heatmap_data(filtered_df))
 
-col5, col6 = st.columns(2)
-with col5:
-    render_outcome_distribution(get_outcome_distribution(filtered_df))
-with col6:
-    render_top_locations(get_top_locations(filtered_df))
+def render_sidebar_snapshot(raw_df, processed_df, validation_report) -> None:
+    with st.sidebar:
+        st.markdown("### Data Snapshot")
+        st.write(f"Raw rows: {len(raw_df):,}")
+        st.write(f"Processed rows: {len(processed_df):,}")
+        st.write(
+            f"Missing required columns: {len(validation_report['missing_required_columns'])}"
+        )
 
-render_top_districts(get_top_districts(filtered_df))
 
-# Optional for now since map is still being debugged
-# render_map(get_map_data(filtered_df))
+def render_dashboard_sections(dashboard_data: dict) -> None:
+    render_kpi_row(dashboard_data["kpi_summary"])
 
-st.markdown("---")
+    st.markdown("---")
 
-col7, col8 = st.columns(2)
-with col7:
-    render_key_takeaways(build_key_takeaways(filtered_df))
-with col8:
-    render_data_quality_summary(get_data_quality_summary(filtered_df))
+    col1, col2 = st.columns(2)
+    with col1:
+        render_crime_type_distribution(dashboard_data["crime_distribution"])
+    with col2:
+        render_monthly_totals(dashboard_data["monthly_totals"])
 
-st.markdown("---")
-render_filtered_data_preview(filtered_df)
+    col3, col4 = st.columns(2)
+    with col3:
+        render_monthly_trend_by_crime_type(dashboard_data["trend_by_crime_type"])
+    with col4:
+        render_crime_heatmap(dashboard_data["heatmap_data"])
+
+    col5, col6 = st.columns(2)
+    with col5:
+        render_outcome_distribution(dashboard_data["outcome_distribution"])
+    with col6:
+        render_top_locations(dashboard_data["top_locations"])
+
+    render_top_districts(dashboard_data["top_districts"])
+
+    # Re-enable after map debugging
+    # render_map(dashboard_data["map_data"])
+
+    st.markdown("---")
+
+    col7, col8 = st.columns(2)
+    with col7:
+        render_key_takeaways(dashboard_data["takeaways"])
+    with col8:
+        render_data_quality_summary(dashboard_data["data_quality_summary"])
+
+    st.markdown("---")
+    render_filtered_data_preview(dashboard_data["filtered_df"])
+
+
+def main() -> None:
+    st.set_page_config(
+        page_title=APP_TITLE,
+        page_icon=APP_ICON,
+        layout=APP_LAYOUT,
+    )
+
+    render_header()
+
+    try:
+        raw_df, processed_df, validation_report = load_app_data()
+    except FileNotFoundError as exc:
+        st.error(f"Data loading error: {exc}")
+        st.stop()
+    except ValueError as exc:
+        st.error(f"Schema validation error: {exc}")
+        st.stop()
+    except Exception as exc:
+        st.error(f"Unexpected application error: {exc}")
+        st.stop()
+
+    render_sidebar_snapshot(raw_df, processed_df, validation_report)
+
+    filters = render_sidebar_filters(processed_df)
+    dashboard_data = build_dashboard_data(processed_df, filters)
+
+    if dashboard_data["filtered_df"].empty:
+        st.warning(
+            "No records match the current filter selection. Adjust the filters and try again."
+        )
+        st.stop()
+
+    render_dashboard_sections(dashboard_data)
+
+
+if __name__ == "__main__":
+    main()
