@@ -18,6 +18,8 @@ from src.analytics import (
     get_top_locations,
     get_top_districts,
     get_map_data,
+    get_data_quality_summary,
+    build_key_takeaways,
 )
 from app.components.filters import render_sidebar_filters, apply_filters
 from app.components.kpis import render_kpi_row
@@ -30,6 +32,11 @@ from app.components.charts import (
     render_top_locations,
     render_top_districts,
     render_map,
+)
+from app.components.tables import (
+    render_key_takeaways,
+    render_data_quality_summary,
+    render_filtered_data_preview,
 )
 
 st.set_page_config(page_title="West Yorkshire Crime Analytics", layout="wide")
@@ -66,4 +73,17 @@ with col6:
     render_top_locations(get_top_locations(filtered_df))
 
 render_top_districts(get_top_districts(filtered_df))
-render_map(get_map_data(filtered_df))
+
+# Optional for now since map is still being debugged
+# render_map(get_map_data(filtered_df))
+
+st.markdown("---")
+
+col7, col8 = st.columns(2)
+with col7:
+    render_key_takeaways(build_key_takeaways(filtered_df))
+with col8:
+    render_data_quality_summary(get_data_quality_summary(filtered_df))
+
+st.markdown("---")
+render_filtered_data_preview(filtered_df)
