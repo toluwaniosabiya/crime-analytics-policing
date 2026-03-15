@@ -1,4 +1,36 @@
-.mypy_cache
-venv
-test.py
+# Python
 __pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# macOS
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Data artifacts
+data/interim/*.csv
+data/processed/*.csv
+
+# Testing / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS / logs
+*.log
