@@ -1,4 +1,4 @@
 .mypy_cache
 venv
 test.py
-src/__pycache__
+__pycache__/
