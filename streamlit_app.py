@@ -9,6 +9,7 @@ st.set_page_config(
     layout="wide",
 )
 
+
 # -----------------------------
 # Helpers
 # -----------------------------
@@ -41,14 +42,45 @@ def load_data(uploaded_file=None) -> pd.DataFrame:
                 "Criminal damage and arson",
                 "Burglary",
                 "Vehicle crime",
-            ] * 6,
+            ]
+            * 6,
             "Count": [
-                8271, 3398, 2468, 1726, 1089, 1014,
-                8793, 4388, 2853, 1932, 1037, 891,
-                9780, 5384, 3039, 2160, 1180, 1084,
-                10721, 5825, 3329, 2353, 1330, 1150,
-                10514, 5828, 3303, 2504, 1500, 1151,
-                9397, 4491, 2919, 2379, 1223, 1152,
+                8271,
+                3398,
+                2468,
+                1726,
+                1089,
+                1014,
+                8793,
+                4388,
+                2853,
+                1932,
+                1037,
+                891,
+                9780,
+                5384,
+                3039,
+                2160,
+                1180,
+                1084,
+                10721,
+                5825,
+                3329,
+                2353,
+                1330,
+                1150,
+                10514,
+                5828,
+                3303,
+                2504,
+                1500,
+                1151,
+                9397,
+                4491,
+                2919,
+                2379,
+                1223,
+                1152,
             ],
             "Reported by": ["West Yorkshire Police"] * 36,
         }
@@ -75,9 +107,7 @@ def ensure_count_column(df: pd.DataFrame) -> pd.DataFrame:
 # Sidebar
 # -----------------------------
 st.sidebar.title("Crime Analytics Dashboard")
-st.sidebar.markdown(
-    "Upload a crime dataset CSV or use the built-in demo data."
-)
+st.sidebar.markdown("Upload a crime dataset CSV or use the built-in demo data.")
 
 uploaded_file = st.sidebar.file_uploader("Upload CSV", type=["csv"])
 df = load_data(uploaded_file)
@@ -146,7 +176,11 @@ with col1:
     st.metric("Total Records", f"{len(filtered_df):,}")
 
 with col2:
-    total_incidents = filtered_df["Count"].sum() if "Count" in filtered_df.columns else len(filtered_df)
+    total_incidents = (
+        filtered_df["Count"].sum()
+        if "Count" in filtered_df.columns
+        else len(filtered_df)
+    )
     st.metric("Total Incidents", f"{int(total_incidents):,}")
 
 with col3:
@@ -222,7 +256,9 @@ with left2:
             .sum()
             .reset_index()
         )
-        heatmap_pivot = heatmap_df.pivot(index=crime_col, columns="MonthLabel", values="Count").fillna(0)
+        heatmap_pivot = heatmap_df.pivot(
+            index=crime_col, columns="MonthLabel", values="Count"
+        ).fillna(0)
         fig_heat = px.imshow(
             heatmap_pivot,
             aspect="auto",
@@ -244,9 +280,7 @@ st.markdown("---")
 st.subheader("Analytical Notes")
 
 if month_col and crime_col and not filtered_df.empty:
-    summary = (
-        filtered_df.groupby(crime_col)["Count"].sum().sort_values(ascending=False)
-    )
+    summary = filtered_df.groupby(crime_col)["Count"].sum().sort_values(ascending=False)
     top_crime = summary.index[0] if len(summary) else "N/A"
     st.success(
         f"Top observed category in the current selection: **{top_crime}**. "
