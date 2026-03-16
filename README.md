@@ -47,17 +47,14 @@ strategic policing decisions.
 
 ## Dashboard Preview
 
-(Add screenshots here once captured)
+![Dashboard Overview](assets/screenshots/overview.png)
+Image showing the Overview KPIs of the application.
 
-Example:
+![Heatmap](assets/screenshots/heatmap.png)
+This is a trend heatmap of crimes across months stratified by different kinds of crime.
 
-/images/dashboard_overview.png\
-/images/crime_heatmap.png\
-/images/location_analysis.png
-
-Example embedding:
-
-![Dashboard Overview](images/dashboard_overview.png)
+![Crime by Location](assets/screenshots/crime_by_location.png)
+Graphic showing proportions of different types of crime per district.
 
 ------------------------------------------------------------------------
 
@@ -121,12 +118,8 @@ Users can inspect the dataset underlying the visualizations.
 The application follows a modular architecture separating data
 ingestion, transformation, analytics logic, and presentation.
 
-crime-analytics-policing │ ├── streamlit_app.py │ ├── src │ ├──
-config.py │ ├── data_loading.py │ ├── data_processing.py │ ├──
-analytics.py │ ├── validation.py │ └── dashboard_service.py │ ├── app │
-└── components │ ├── charts.py │ ├── filters.py │ ├── kpis.py │ ├──
-layout.py │ ├── section_headers.py │ └── tables.py │ ├── data │ └── raw
-│ ├── notebooks │ ├── tests │ └── reports
+![Project Architecture](assets/project-architecture/project_architecture.png)
+
 
 ### Architecture Principles
 
@@ -218,6 +211,7 @@ VS Code
 
 git clone
 https://github.com/toluwaniosabiya/crime-analytics-policing.git\
+
 cd crime-analytics-policing
 
 ### Create a virtual environment
@@ -275,6 +269,3 @@ Data Scientist \| Health & Public Sector Analytics
 
 GitHub\
 https://github.com/toluwaniosabiya
-
-LinkedIn\
-(Add LinkedIn profile here)
