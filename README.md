@@ -34,7 +34,7 @@ structured in real-world public sector analytics environments.
 
 **Streamlit App**
 
-https://crime-analytics-policing.streamlit.app
+https://crime-analytics-policing-f6ivvndqei2nl6xantztaf.streamlit.app/
 
 **GitHub Repository**
 
