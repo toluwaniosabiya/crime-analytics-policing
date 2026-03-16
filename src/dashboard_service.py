@@ -11,7 +11,6 @@ from src.analytics import (
     get_crime_heatmap_data,
     get_crime_type_distribution,
     get_data_quality_summary,
-    get_map_data,
     get_monthly_totals,
     get_monthly_trend_by_crime_type,
     get_outcome_distribution,
@@ -75,7 +74,6 @@ def build_dashboard_outputs(filtered_df: pd.DataFrame) -> Dict[str, object]:
         "outcome_distribution": get_outcome_distribution(filtered_df),
         "top_locations": get_top_locations(filtered_df),
         "top_districts": get_top_districts(filtered_df),
-        "map_data": get_map_data(filtered_df),
         "data_quality_summary": get_data_quality_summary(filtered_df),
         "takeaways": build_key_takeaways(filtered_df),
     }
