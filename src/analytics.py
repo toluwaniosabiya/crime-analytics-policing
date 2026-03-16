@@ -121,17 +121,36 @@ def get_monthly_trend_by_crime_type(df: pd.DataFrame) -> pd.DataFrame:
 
 def get_crime_heatmap_data(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Return matrix-style data for crime counts by month.
+    Return matrix-style data for crime counts by month,
+    with months ordered chronologically.
     """
-    trend_df = get_monthly_trend_by_crime_type(df)
-    if trend_df.empty:
+    required_cols = {"Month Parsed", "Month Label", "Crime type", "Record Count"}
+    if not required_cols.issubset(df.columns):
         return pd.DataFrame()
 
-    return (
-        trend_df.pivot(index="Crime type", columns="Month Label", values="Incidents")
-        .fillna(0)
-        .sort_index()
+    trend_df = (
+        df.groupby(["Month Parsed", "Month Label", "Crime type"], as_index=False)[
+            "Record Count"
+        ]
+        .sum()
+        .rename(columns={"Record Count": "Incidents"})
+        .sort_values("Month Parsed")
     )
+
+    month_order = (
+        trend_df[["Month Parsed", "Month Label"]]
+        .drop_duplicates()
+        .sort_values("Month Parsed")["Month Label"]
+        .tolist()
+    )
+
+    heatmap_df = trend_df.pivot(
+        index="Crime type", columns="Month Label", values="Incidents"
+    ).fillna(0)
+
+    heatmap_df = heatmap_df.reindex(columns=month_order)
+
+    return heatmap_df
 
 
 def get_outcome_distribution(
