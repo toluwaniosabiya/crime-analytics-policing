@@ -12,6 +12,24 @@ production-style dashboard interface.
 
 ------------------------------------------------------------------------
 
+## Project Motivation
+
+This project demonstrates how modern analytics tools can support
+**evidence-based policing and crime analysis**.
+
+Analysts in public safety environments must be able to:
+
+-   identify crime patterns
+-   investigate spatial trends
+-   evaluate outcomes
+-   monitor operational data quality
+-   communicate insights to decision makers
+
+The dashboard architecture reflects how analytical systems are
+structured in real-world public sector analytics environments.
+
+---
+
 ## Live Application
 
 **Streamlit App**
@@ -45,16 +63,23 @@ strategic policing decisions.
 
 ------------------------------------------------------------------------
 
+## How to Use the Dashboard
+Choose months → filter crime types/districts → inspect trends and district composition.
+
+---
+
+
 ## Dashboard Preview
 
 ![Dashboard Overview](assets/screenshots/overview.png)
-Image showing the Overview KPIs of the application.
+Overview KPIs,
+
 
 ![Heatmap](assets/screenshots/heatmap.png)
-This is a trend heatmap of crimes across months stratified by different kinds of crime.
+Temporal crime intensity heatmap
 
 ![Crime by Location](assets/screenshots/crime_by_location.png)
-Graphic showing proportions of different types of crime per district.
+District-level crime mix
 
 ------------------------------------------------------------------------
 
@@ -228,24 +253,6 @@ pip install -r requirements.txt
 streamlit run streamlit_app.py
 
 The dashboard will open in your browser.
-
-------------------------------------------------------------------------
-
-## Project Motivation
-
-This project demonstrates how modern analytics tools can support
-**evidence-based policing and crime analysis**.
-
-Analysts in public safety environments must be able to:
-
--   identify crime patterns
--   investigate spatial trends
--   evaluate outcomes
--   monitor operational data quality
--   communicate insights to decision makers
-
-The dashboard architecture reflects how analytical systems are
-structured in real-world public sector analytics environments.
 
 ------------------------------------------------------------------------
 
