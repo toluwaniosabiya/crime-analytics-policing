@@ -189,13 +189,34 @@ def get_top_districts(df: pd.DataFrame, top_n: int = TOP_N_DEFAULT) -> pd.DataFr
 
 def get_map_data(df: pd.DataFrame, sample_size: int = MAP_SAMPLE_SIZE) -> pd.DataFrame:
     """
-    Return map-ready records with non-null coordinates, optionally sampled for performance.
+    Return map-ready records with valid West Yorkshire coordinates.
+    Also correct obvious latitude/longitude swaps.
     """
-    required_cols = {"Latitude", "Longitude"}
-    if not required_cols.issubset(df.columns):
+    if "Latitude" not in df.columns or "Longitude" not in df.columns:
         return pd.DataFrame()
 
-    map_df = df.dropna(subset=["Latitude", "Longitude"]).copy()
+    map_df = df.copy()
+
+    map_df["Latitude"] = pd.to_numeric(map_df["Latitude"], errors="coerce")
+    map_df["Longitude"] = pd.to_numeric(map_df["Longitude"], errors="coerce")
+
+    map_df = map_df.dropna(subset=["Latitude", "Longitude"]).copy()
+
+    # Fix obvious swaps:
+    # if latitude looks like a UK longitude and longitude looks like a UK latitude, swap them
+    swap_mask = map_df["Latitude"].between(-3, 0) & map_df["Longitude"].between(50, 56)
+
+    map_df.loc[swap_mask, ["Latitude", "Longitude"]] = map_df.loc[
+        swap_mask, ["Longitude", "Latitude"]
+    ].to_numpy()
+
+    # Keep only plausible West Yorkshire coordinates
+    map_df = map_df[
+        map_df["Latitude"].between(53.3, 54.1) & map_df["Longitude"].between(-2.3, -1.0)
+    ].copy()
+
+    if map_df.empty:
+        return pd.DataFrame()
 
     if len(map_df) > sample_size:
         map_df = map_df.sample(sample_size, random_state=42)

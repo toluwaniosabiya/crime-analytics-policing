@@ -164,7 +164,7 @@ def render_top_districts(district_df: pd.DataFrame) -> None:
 
 def render_map(map_df: pd.DataFrame) -> None:
     """
-    Render geographic incident map.
+    Render geographic incident map with Plotly.
     """
     st.subheader("Geographic View")
 
@@ -174,47 +174,39 @@ def render_map(map_df: pd.DataFrame) -> None:
 
     plot_df = map_df.copy()
 
-    # Force numeric coordinates again, just to be safe at render time
     plot_df["Latitude"] = pd.to_numeric(plot_df["Latitude"], errors="coerce")
     plot_df["Longitude"] = pd.to_numeric(plot_df["Longitude"], errors="coerce")
+
     plot_df = plot_df.dropna(subset=["Latitude", "Longitude"]).copy()
 
     if plot_df.empty:
-        st.info("All coordinates became null after numeric coercion.")
+        st.info("No valid coordinate data available after coordinate cleaning.")
         return
 
-    # Optional sanity check for valid ranges
-    plot_df = plot_df[
-        plot_df["Latitude"].between(-90, 90) & plot_df["Longitude"].between(-180, 180)
-    ].copy()
+    center_lat = float(plot_df["Latitude"].median())
+    center_lon = float(plot_df["Longitude"].median())
 
-    if plot_df.empty:
-        st.info("No coordinates fall within valid latitude/longitude ranges.")
-        return
+    hover_fields = [
+        col
+        for col in ["Crime type", "Month Label", "Last outcome category"]
+        if col in plot_df.columns
+    ]
 
-    center_lat = plot_df["Latitude"].median()
-    center_lon = plot_df["Longitude"].median()
-
-    fig = px.scatter_map(
+    fig = px.scatter_mapbox(
         plot_df,
         lat="Latitude",
         lon="Longitude",
-        color="Crime type" if "Crime type" in plot_df.columns else None,
         hover_name="Location" if "Location" in plot_df.columns else None,
-        hover_data=[
-            col
-            for col in ["Month Label", "Last outcome category"]
-            if col in plot_df.columns
-        ],
-        center={"lat": center_lat, "lon": center_lon},
+        hover_data=hover_fields,
+        color="Crime type" if "Crime type" in plot_df.columns else None,
         zoom=9,
         height=650,
-        title="Filtered Incidents by Location",
     )
 
     fig.update_layout(
         mapbox_style="open-street-map",
-        margin={"r": 0, "t": 50, "l": 0, "b": 0},
+        mapbox_center={"lat": center_lat, "lon": center_lon},
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
     )
 
     st.plotly_chart(fig, use_container_width=True)

@@ -14,12 +14,12 @@ from app.components.kpis import render_kpi_row
 from app.components.charts import (
     render_crime_heatmap,
     render_crime_type_distribution,
+    render_map,
     render_monthly_totals,
     render_monthly_trend_by_crime_type,
     render_outcome_distribution,
     render_top_districts,
     render_top_locations,
-    # render_map,
 )
 from app.components.tables import (
     render_data_quality_summary,
@@ -95,7 +95,87 @@ def render_dashboard_sections(dashboard_data: dict) -> None:
     render_top_districts(dashboard_data["top_districts"])
 
     # Re-enable after map debugging
-    # render_map(dashboard_data["map_data"])
+    #### Debugging Map #####
+    st.markdown("### Map Debug")
+
+    map_df = dashboard_data["map_data"]
+
+    st.write("map_df shape:", map_df.shape)
+    st.write("map_df columns:", map_df.columns.tolist())
+
+    if not map_df.empty:
+        st.write("Latitude dtype:", map_df["Latitude"].dtype)
+        st.write("Longitude dtype:", map_df["Longitude"].dtype)
+        st.write("Latitude nulls:", int(map_df["Latitude"].isna().sum()))
+        st.write("Longitude nulls:", int(map_df["Longitude"].isna().sum()))
+        st.write(
+            "Latitude min/max:",
+            float(map_df["Latitude"].min()),
+            float(map_df["Latitude"].max()),
+        )
+        st.write(
+            "Longitude min/max:",
+            float(map_df["Longitude"].min()),
+            float(map_df["Longitude"].max()),
+        )
+        st.dataframe(map_df[["Latitude", "Longitude"]].head(20))
+
+        st.write("map_df shape:", map_df.shape)
+
+        if not map_df.empty:
+            st.write(
+                "Latitude min/max:",
+                float(map_df["Latitude"].min()),
+                float(map_df["Latitude"].max()),
+            )
+            st.write(
+                "Longitude min/max:",
+                float(map_df["Longitude"].min()),
+                float(map_df["Longitude"].max()),
+            )
+
+            st.write("Rows going into st.map():", len(map_df))
+            st.dataframe(
+                map_df[["Latitude", "Longitude"]].head(10),
+                use_container_width=True,
+                hide_index=True,
+            )
+
+            test_map_df = (
+                map_df[["Latitude", "Longitude"]]
+                .rename(columns={"Latitude": "lat", "Longitude": "lon"})
+                .dropna()
+                .head(10)
+                .copy()
+            )
+
+            st.write("Test map rows:", len(test_map_df))
+            st.dataframe(test_map_df, use_container_width=True, hide_index=True)
+
+            st.map(test_map_df)
+
+            import pandas as pd
+
+            known_good_df = pd.DataFrame(
+                {
+                    "lat": [53.8008, 53.7920],
+                    "lon": [-1.5491, -1.5400],
+                }
+            )
+
+            st.write("Known-good Leeds test points")
+            st.dataframe(known_good_df, use_container_width=True, hide_index=True)
+            st.map(known_good_df)
+
+            st.map(
+                map_df.rename(columns={"Latitude": "lat", "Longitude": "lon"})[
+                    ["lat", "lon"]
+                ]
+            )
+
+        #### Debugging Map #####
+
+    render_map(dashboard_data["map_data"])
 
     st.markdown("---")
 
