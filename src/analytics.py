@@ -215,6 +215,36 @@ def get_data_quality_summary(df: pd.DataFrame) -> Dict[str, int]:
     return summary
 
 
+def get_district_crime_mix(
+    df: pd.DataFrame, top_n: int = TOP_N_DEFAULT
+) -> pd.DataFrame:
+    """
+    Return incident counts by district and crime type for the top districts.
+    """
+    required_cols = {"District", "Crime type", "Record Count"}
+    if not required_cols.issubset(df.columns):
+        return pd.DataFrame(columns=["District", "Crime type", "Incidents"])
+
+    district_totals = (
+        df.groupby("District", as_index=False)["Record Count"]
+        .sum()
+        .rename(columns={"Record Count": "Total Incidents"})
+        .sort_values("Total Incidents", ascending=False)
+        .head(top_n)
+    )
+
+    top_districts = district_totals["District"].tolist()
+
+    return (
+        df[df["District"].isin(top_districts)]
+        .groupby(["District", "Crime type"], as_index=False)["Record Count"]
+        .sum()
+        .rename(columns={"Record Count": "Incidents"})
+        .sort_values(["District", "Incidents"], ascending=[True, False])
+        .reset_index(drop=True)
+    )
+
+
 def build_key_takeaways(df: pd.DataFrame) -> Dict[str, str]:
     """
     Return simple dashboard narrative takeaways based on the current filtered data.

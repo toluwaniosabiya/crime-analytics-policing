@@ -20,6 +20,7 @@ def render_crime_type_distribution(crime_df: pd.DataFrame) -> None:
         orientation="h",
         text_auto=True,
         title="Incidents by Crime Type",
+        color_discrete_sequence=["#80CBC4"],
     )
     fig.update_layout(
         yaxis={"categoryorder": "total ascending"},
@@ -44,6 +45,7 @@ def render_monthly_totals(monthly_totals_df: pd.DataFrame) -> None:
         y="Incidents",
         markers=True,
         title="Total Incidents by Month",
+        color_discrete_sequence=["#80CBC4"],
     )
     fig.update_layout(height=500)
     st.plotly_chart(fig, use_container_width=True)
@@ -86,10 +88,14 @@ def render_crime_heatmap(heatmap_df: pd.DataFrame) -> None:
         aspect="auto",
         labels={"x": "Month", "y": "Crime Type", "color": "Incidents"},
         title="Crime Type Counts by Month",
-        color_continuous_scale="RdPu",
+        color_continuous_scale="GnBu",
     )
     fig.update_layout(height=500)
-    fig.update_traces(hovertemplate="Crime: %{y}<br>Month: %{x}<br>Incidents: %{z}")
+    fig.update_traces(
+        hovertemplate="Crime Type: %{y}<br>Month: %{x}<br>Incidents: %{z}"
+    )
+    fig.update_xaxes(showgrid=True)
+    fig.update_yaxes(showgrid=True)
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -110,6 +116,7 @@ def render_outcome_distribution(outcome_df: pd.DataFrame) -> None:
         orientation="h",
         text_auto=True,
         title="Top Outcome Categories",
+        color_discrete_sequence=["#80CBC4"],
     )
     fig.update_layout(
         yaxis={"categoryorder": "total ascending"},
@@ -135,6 +142,7 @@ def render_top_locations(location_df: pd.DataFrame) -> None:
         orientation="h",
         text_auto=True,
         title="Locations with Highest Incident Counts",
+        color_discrete_sequence=["#80CBC4"],
     )
     fig.update_layout(height=500)
     st.plotly_chart(fig, use_container_width=True)
@@ -157,6 +165,38 @@ def render_top_districts(district_df: pd.DataFrame) -> None:
         orientation="h",
         text_auto=True,
         title="Districts with Highest Incident Counts",
+        color_discrete_sequence=["#80CBC4"],
     )
     fig.update_layout(height=500)
+    st.plotly_chart(fig, use_container_width=True)
+
+
+def render_district_crime_mix(district_mix_df: pd.DataFrame) -> None:
+    """
+    Render stacked horizontal bar chart showing crime composition by district.
+    """
+    st.subheader("Crime Mix by District")
+
+    if district_mix_df.empty:
+        st.info(
+            "No district crime mix data available for the current filter selection."
+        )
+        return
+
+    fig = px.bar(
+        district_mix_df,
+        x="Incidents",
+        y="District",
+        color="Crime type",
+        orientation="h",
+        title="Crime Composition Across Top Districts",
+    )
+
+    fig.update_layout(
+        barmode="stack",
+        height=600,
+        yaxis={"categoryorder": "total ascending"},
+        legend_title_text="Crime Type",
+    )
+
     st.plotly_chart(fig, use_container_width=True)
